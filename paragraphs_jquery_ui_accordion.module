@@ -1,0 +1,126 @@
+<?php
+/**
+ * @file
+ * Paragraphs jQuery UI Accordion hooks and common functions.
+ */
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function paragraphs_jquery_ui_accordion_field_formatter_info() {
+  return array(
+    'paragraphs_jquery_ui_accordion_formatter' => array(
+      'label' => t('Paragraphs jQuery UI Accordion'),
+      'field types' => array('paragraphs'),
+      'settings' => array(
+        'bundle' => NULL,
+        'title' => NULL,
+        'content' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function paragraphs_jquery_ui_accordion_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong>', array(
+    '@bundle' => $settings['bundle'],
+    '@title' => $settings['title'],
+    '@content' => $settings['content'],
+  ));
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function paragraphs_jquery_ui_accordion_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  $bundles = paragraphs_bundle_load();
+  $paragraphs_fields = $bundles_options = array();
+  foreach ($bundles as $bundle) {
+    $instances = field_info_instances('paragraphs_item', $bundle->bundle);
+    $bundles_options[$bundle->bundle] = $bundle->name;
+    foreach ($instances as $paragraphs_instance) {
+      $paragraphs_fields[$paragraphs_instance['field_name']] = $paragraphs_instance['label'];
+    }
+  }
+
+  $element['bundle'] = array(
+    '#type' => 'select',
+    '#title' => t('Bundle'),
+    '#description' => t('Select paragraphs bundle'),
+    '#default_value' => $settings['bundle'],
+    '#options' => $bundles_options,
+  );
+  $element['title'] = array(
+    '#type' => 'select',
+    '#title' => t('Paragraphs title'),
+    '#default_value' => $settings['title'],
+    '#options' => $paragraphs_fields,
+  );
+  $element['content'] = array(
+    '#type' => 'select',
+    '#title' => t('Paragraphs content'),
+    '#default_value' => $settings['content'],
+    '#options' => $paragraphs_fields,
+  );
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array(); // Initialize the var.
+  $settings = $display['settings']; // get the settings.
+
+  $accordion_id = 'accordion-' . $entity->nid;
+  $element[0]['#attached'] = array(
+    'library' => array(
+      array('system', 'ui.accordion'),
+    ),
+    'js' => array(
+      array(
+        'data' => drupal_get_path('module', 'paragraphs_jquery_ui_accordion') . '/js/paragraphs_jquery_ui_accordion.js',
+        'type' => 'file',
+      ),
+      array(
+        'data' => array('paragraphs_jquery_ui_accordion' => array('id' => $accordion_id )),
+        'type' => 'setting',
+      ),
+    )
+  );
+  $element[0]['accordion'] = array(
+    '#type' => 'container',
+    '#attributes' => array('id' => $accordion_id)
+  );
+  $paragraphs_ids = array();
+  foreach ($items as $id => $item) {
+    $paragraphs_ids[$id] = $item['value'];
+  }
+  $paragraphs_items = entity_load('paragraphs_item', $paragraphs_ids);
+
+  foreach ($paragraphs_items as $paragraphs_item) {
+    $display = array('label' => 'hidden');
+
+    $paragraph_field = field_view_field('paragraphs_item', $paragraphs_item, $settings['content'], $display, $langcode = NULL);
+    $render_paragraph_field = drupal_render($paragraph_field);
+
+    $title = field_get_items('paragraphs_item', $paragraphs_item, $settings['title']);
+
+    $paragraphs_unique_id = drupal_clean_css_identifier(strtolower($title[0]['value'])) ;
+    $element[0]['accordion'][] = array(
+      'title' => array('#markup' => '<h3><a id="' . $paragraphs_unique_id . '" href="#' . $paragraphs_unique_id . '">' . $title[0]['value'] . '</a></h3>'),
+      'content' => array('#markup' => '<div>' . $render_paragraph_field . '</div>')
+    );
+  }
+  return $element;
+}
