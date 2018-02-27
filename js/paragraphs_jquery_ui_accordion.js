@@ -7,6 +7,7 @@
   Drupal.behaviors.paragraphs_jquery_ui_accordion = {
     attach: function (context, settings) {
       var accordion_id = '#' + Drupal.settings.paragraphs_jquery_ui_accordion.id;
+      var autoscroll = Drupal.settings.paragraphs_jquery_ui_accordion.autoscroll;
 
       if (window.location.hash) {
         var activeParagraph = false;
@@ -36,9 +37,11 @@
       function changeHash(newHash) {
         if (newHash != 'undefined' && newHash) {
           var target = $(newHash);
-          $('html, body').animate({
-            scrollTop: target.offset().top - 50
-          }, 250);
+          if (autoscroll === 1) {
+            $('html, body').animate({
+              scrollTop: target.offset().top - 50
+            }, 250);
+          }
           return false;
         }
       }

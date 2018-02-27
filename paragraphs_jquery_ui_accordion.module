@@ -16,6 +16,7 @@ function paragraphs_jquery_ui_accordion_field_formatter_info() {
         'bundle' => NULL,
         'title' => NULL,
         'content' => NULL,
+        'autoscroll' => NULL,
       ),
     ),
   );
@@ -27,10 +28,11 @@ function paragraphs_jquery_ui_accordion_field_formatter_info() {
 function paragraphs_jquery_ui_accordion_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong>', array(
+  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong> and autoscroll <strong>@autoscroll</strong>', array(
     '@bundle' => $settings['bundle'],
     '@title' => $settings['title'],
     '@content' => $settings['content'],
+    '@autoscroll' => $settings['autoscroll'] ? t('enabled') : t('disabled'),
   ));
   return $summary;
 }
@@ -72,6 +74,11 @@ function paragraphs_jquery_ui_accordion_field_formatter_settings_form($field, $i
     '#default_value' => $settings['content'],
     '#options' => $paragraphs_fields,
   );
+  $element['autoscroll'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Autoscroll'),
+    '#default_value' => isset($settings['autoscroll']) ? $settings['autoscroll'] : 0,
+  );
   return $element;
 }
 
@@ -93,7 +100,7 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
         'type' => 'file',
       ),
       array(
-        'data' => array('paragraphs_jquery_ui_accordion' => array('id' => $accordion_id )),
+        'data' => array('paragraphs_jquery_ui_accordion' => array('id' => $accordion_id, 'autoscroll' => $settings['autoscroll'])),
         'type' => 'setting',
       ),
     )
