@@ -21,7 +21,7 @@
         animated: 'slide',
         autoHeight: false,
         navigation: true,
-        heightStyle: "content",
+        heightStyle: "content"
       });
 
       $(accordion_id, context).on( "accordionactivate", function( event, ui ) {
@@ -35,7 +35,7 @@
       }).trigger('hashchange');
 
       function changeHash(newHash) {
-        if (newHash != 'undefined' && newHash) {
+        if (newHash !== 'undefined' && newHash) {
           var target = $(newHash);
           if (autoscroll === 1) {
             $('html, body').animate({
