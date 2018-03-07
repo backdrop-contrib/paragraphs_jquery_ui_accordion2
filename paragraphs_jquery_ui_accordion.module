@@ -58,26 +58,25 @@ function paragraphs_jquery_ui_accordion_field_formatter_settings_form($field, $i
 
   $element['bundle'] = array(
     '#type' => 'select',
-    '#title' => t('Bundle'),
-    '#description' => t('Select paragraphs bundle'),
+    '#title' => t('Paragraph bundle'),
     '#default_value' => $settings['bundle'],
     '#options' => $bundles_options,
   );
   $element['title'] = array(
     '#type' => 'select',
-    '#title' => t('Paragraphs title'),
+    '#title' => t('Paragraph title'),
     '#default_value' => $settings['title'],
     '#options' => $paragraphs_fields,
   );
   $element['content'] = array(
     '#type' => 'select',
-    '#title' => t('Paragraphs content'),
+    '#title' => t('Paragraph content'),
     '#default_value' => $settings['content'],
     '#options' => $paragraphs_fields,
   );
   $element['autoscroll'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Autoscroll'),
+    '#title' => t('AutoScroll'),
     '#default_value' => isset($settings['autoscroll']) ? $settings['autoscroll'] : 0,
   );
   return $element;
