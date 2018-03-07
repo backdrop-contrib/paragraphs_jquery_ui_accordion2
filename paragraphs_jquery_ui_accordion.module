@@ -89,7 +89,10 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
   $element = array(); // Initialize the var.
   $settings = $display['settings']; // get the settings.
 
-  $accordion_id = 'accordion-' . $entity->nid;
+  $entity_ids = entity_extract_ids($entity_type, $entity);
+  $entity_id = $entity_ids[0];
+
+  $accordion_id = 'accordion-' . $entity_id;
   $element[0]['#attached'] = array(
     'library' => array(
       array('system', 'ui.accordion'),
