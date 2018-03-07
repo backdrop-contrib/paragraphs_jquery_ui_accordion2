@@ -28,7 +28,8 @@ function paragraphs_jquery_ui_accordion_field_formatter_info() {
 function paragraphs_jquery_ui_accordion_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong> and autoscroll <strong>@autoscroll</strong>', array(
+  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong> and autoscroll <strong>@autoscroll</strong>',
+  array(
     '@bundle' => $settings['bundle'],
     '@title' => $settings['title'],
     '@content' => $settings['content'],
@@ -86,8 +87,8 @@ function paragraphs_jquery_ui_accordion_field_formatter_settings_form($field, $i
  * Implements hook_field_formatter_view().
  */
 function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array(); // Initialize the var.
-  $settings = $display['settings']; // get the settings.
+  $element = array();
+  $settings = $display['settings'];
 
   $entity_ids = entity_extract_ids($entity_type, $entity);
   $entity_id = $entity_ids[0];
@@ -106,11 +107,11 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
         'data' => array('paragraphs_jquery_ui_accordion' => array('id' => $accordion_id, 'autoscroll' => $settings['autoscroll'])),
         'type' => 'setting',
       ),
-    )
+    ),
   );
   $element[0]['accordion'] = array(
     '#type' => 'container',
-    '#attributes' => array('id' => $accordion_id)
+    '#attributes' => array('id' => $accordion_id),
   );
   $paragraphs_ids = array();
   foreach ($items as $id => $item) {
@@ -126,10 +127,10 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
 
     $title = field_get_items('paragraphs_item', $paragraphs_item, $settings['title']);
 
-    $paragraphs_unique_id = drupal_clean_css_identifier(strtolower($title[0]['value'])) ;
+    $paragraphs_unique_id = drupal_clean_css_identifier(strtolower($title[0]['value']));
     $element[0]['accordion'][] = array(
       'title' => array('#markup' => '<h3><a id="' . $paragraphs_unique_id . '" href="#' . $paragraphs_unique_id . '">' . $title[0]['value'] . '</a></h3>'),
-      'content' => array('#markup' => '<div>' . $render_paragraph_field . '</div>')
+      'content' => array('#markup' => '<div>' . $render_paragraph_field . '</div>'),
     );
   }
   return $element;
