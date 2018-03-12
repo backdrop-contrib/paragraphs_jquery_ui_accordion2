@@ -126,7 +126,7 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
 
     $title = field_get_items('paragraphs_item', $paragraphs_item, $settings['title']);
 
-    $paragraphs_unique_id = drupal_clean_css_identifier(strtolower($title[0]['value'] . '-' . $entity_id));
+    $paragraphs_unique_id = drupal_html_id(strtolower($title[0]['value']));
     $element[0]['accordion'][] = array(
       'title' => array('#markup' => '<h3><a id="' . $paragraphs_unique_id . '" href="#' . $paragraphs_unique_id . '">' . $title[0]['value'] . '</a></h3>'),
       'content' => array('#markup' => '<div>' . $render_paragraph_field . '</div>'),
