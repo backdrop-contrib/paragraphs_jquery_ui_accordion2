@@ -1,4 +1,4 @@
-### Paragraphs jQuery UI Accordion
+# Paragraphs jQuery UI Accordion
 
 Paragraphs jQuery UI Accordion is a module to create paragraphs with accordion effect in your content.
 
