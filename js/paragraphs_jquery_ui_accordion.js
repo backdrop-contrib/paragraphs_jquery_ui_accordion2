@@ -4,10 +4,10 @@
  */
 
 (function ($) {
-  Drupal.behaviors.paragraphs_jquery_ui_accordion = {
+  Backdrop.behaviors.paragraphs_jquery_ui_accordion = {
     attach: function (context, settings) {
-      var ids = Drupal.settings.paragraphs_jquery_ui_accordion.ids;
-      var autoscroll = Drupal.settings.paragraphs_jquery_ui_accordion.autoscroll;
+      var ids = Backdrop.settings.paragraphs_jquery_ui_accordion.ids;
+      var autoscroll = Backdrop.settings.paragraphs_jquery_ui_accordion.autoscroll;
 
       // Determine initial state of accordion paragraphs (from hash or first item).
       if (window.location.hash) {

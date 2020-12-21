@@ -99,11 +99,14 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
     ),
     'js' => array(
       array(
-        'data' => drupal_get_path('module', 'paragraphs_jquery_ui_accordion') . '/js/paragraphs_jquery_ui_accordion.js',
+        'data' => backdrop_get_path('module', 'paragraphs_jquery_ui_accordion') . '/js/paragraphs_jquery_ui_accordion.js',
         'type' => 'file',
       ),
       array(
-        'data' => array('paragraphs_jquery_ui_accordion' => array('ids' => array($entity_id => $accordion_id), 'autoscroll' => $settings['autoscroll'])),
+        'data' => array('paragraphs_jquery_ui_accordion' => array(
+            'ids' => array($entity_id => $accordion_id),
+            'autoscroll' => $settings['autoscroll'],
+          )),
         'type' => 'setting',
       ),
     ),
@@ -122,11 +125,11 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
     $display = array('label' => 'hidden');
 
     $paragraph_field = field_view_field('paragraphs_item', $paragraphs_item, $settings['content'], $display, $langcode = NULL);
-    $render_paragraph_field = drupal_render($paragraph_field);
+    $render_paragraph_field = backdrop_render($paragraph_field);
 
     $title = field_get_items('paragraphs_item', $paragraphs_item, $settings['title']);
 
-    $paragraphs_unique_id = drupal_html_id(strtolower($title[0]['value']));
+    $paragraphs_unique_id = backdrop_html_id(strtolower($title[0]['value']));
     $element[0]['accordion'][] = array(
       'title' => array('#markup' => '<h3><a id="' . $paragraphs_unique_id . '" href="#' . $paragraphs_unique_id . '">' . $title[0]['value'] . '</a></h3>'),
       'content' => array('#markup' => '<div>' . $render_paragraph_field . '</div>'),
