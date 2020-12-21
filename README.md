@@ -15,7 +15,7 @@ It based on jQuery UI Accordion plugin which already included in core, so no nee
 
 ## Installation
 
-* Ensure Paragraphs module is enabled.
+* Ensure [Paragraphs](https://github.com/backdrop-contrib/paragraphs) module is enabled.
 * Install this module using the official [Backdrop CMS instructions](https://backdropcms.org/user-guide/modules).
 
 
