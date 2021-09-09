@@ -17,6 +17,7 @@ function paragraphs_jquery_ui_accordion_field_formatter_info() {
         'title' => NULL,
         'content' => NULL,
         'autoscroll' => NULL,
+        'startclosed' => NULL,
       ),
     ),
   );
@@ -28,12 +29,13 @@ function paragraphs_jquery_ui_accordion_field_formatter_info() {
 function paragraphs_jquery_ui_accordion_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong> and autoscroll <strong>@autoscroll</strong>',
+  $summary = t('Use fields <strong>@title</strong> and <strong>@content</strong> with paragraphs bundle <strong>@bundle</strong>, autoscroll <strong>@autoscroll</strong> and startclosed <strong>@startclosed</strong>',
   array(
     '@bundle' => $settings['bundle'],
     '@title' => $settings['title'],
     '@content' => $settings['content'],
     '@autoscroll' => $settings['autoscroll'] ? t('enabled') : t('disabled'),
+    '@startclosed' => $settings['startclosed'] ? t('enabled') : t('disabled'),
   ));
   return $summary;
 }
@@ -79,6 +81,11 @@ function paragraphs_jquery_ui_accordion_field_formatter_settings_form($field, $i
     '#title' => t('AutoScroll'),
     '#default_value' => isset($settings['autoscroll']) ? $settings['autoscroll'] : 0,
   );
+  $element['startclosed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Start Closed'),
+    '#default_value' => isset($settings['startclosed']) ? $settings['startclosed'] : 0,
+  );
   return $element;
 }
 
@@ -106,6 +113,7 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
         'data' => array('paragraphs_jquery_ui_accordion' => array(
             'ids' => array($entity_id => $accordion_id),
             'autoscroll' => $settings['autoscroll'],
+            'startclosed' => $settings['startclosed'],
           )),
         'type' => 'setting',
       ),
@@ -113,7 +121,10 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
   );
   $element[0]['accordion'] = array(
     '#type' => 'container',
-    '#attributes' => array('id' => $accordion_id),
+    '#attributes' => array(
+      'id' => $accordion_id,
+      'class' => array('para-jq-acc'),
+    ),
   );
   $paragraphs_ids = array();
   foreach ($items as $id => $item) {
