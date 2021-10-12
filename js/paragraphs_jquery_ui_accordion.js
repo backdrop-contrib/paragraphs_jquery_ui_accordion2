@@ -6,20 +6,21 @@
 (function ($) {
   Backdrop.behaviors.paragraphs_jquery_ui_accordion = {
     attach: function (context, settings) {
-      var ids = Backdrop.settings.paragraphs_jquery_ui_accordion.ids;
-      var autoscroll = Backdrop.settings.paragraphs_jquery_ui_accordion.autoscroll;
+    $('.para-jq-acc', context).each(function (id) {
+        var accordion_id = $(this).attr('id');
+        var autoscroll = Backdrop.settings.paragraphs_jquery_ui_accordion.autoscroll;
+        var startclosed = Backdrop.settings.paragraphs_jquery_ui_accordion.startclosed;
+        if (window.location.hash) {
+          var activeParagraph = false;
+        } else {
+          if (startclosed) {
+            var activeParagraph = false;
+          } else {
+            var activeParagraph = 0;
+          }
+        }
 
-      // Determine initial state of accordion paragraphs (from hash or first item).
-      if (window.location.hash) {
-        var activeParagraph = false;
-      } else {
-        var activeParagraph = 0;
-      }
-
-      // Initialization of each accordion.
-      $.each(ids, function( index, accordion_id ) {
-        accordion_id = '#' + accordion_id;
-        $(accordion_id, context).accordion({
+        $('#' + accordion_id, context).accordion({
           active: activeParagraph,
           collapsible: true,
           animated: 'slide',
@@ -28,30 +29,26 @@
           heightStyle: "content"
         });
 
-        if (autoscroll === 1) {
-          $(accordion_id, context).on( "accordionactivate", function( event, ui ) {
-            var newHash = $(ui.newHeader).find('a').attr('href');
-            autoScroll(newHash);
-          });
-        }
-
+        $(accordion_id, context).on("accordionactivate", function (event, ui) {
+          var newHash = $(ui.newHeader).find('a').attr('href');
+          changeHash(newHash, autoscroll);
+        });
         // Open content that matches the hash.
         $( window ).on('hashchange', function() {
           activateParagraph(accordion_id);
         }).trigger('hashchange');
       });
 
-      /**
-       * AutoScroll function.
-       *
-       * @param newHash
-       */
-      function autoScroll(newHash) {
+      function changeHash(newHash, autoscroll) {
         if (newHash !== 'undefined' && newHash) {
           var target = $(newHash);
-          $('html, body').animate({
-            scrollTop: target.offset().top - 50
-          }, 250);
+          if (autoscroll === 1) {
+            setTimeout(function() {
+              $('html, body').animate({
+                scrollTop: target.offset().top - 50
+              }, 250);
+            }, 310); // Ensure the collapse animation is done.
+          }
           return false;
         }
       }
