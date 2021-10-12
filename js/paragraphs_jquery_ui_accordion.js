@@ -62,7 +62,7 @@
         var hash = window.location.hash;
         if (hash) {
           var thash = hash.substring(hash.lastIndexOf('#'), hash.length);
-          var paragraph = $(accordion_id).find('a[href*='+ thash + ']').closest('h3');
+          var paragraph = $(accordion_id).find('a[href*="+ thash + "]').closest('h3');
           if (!$(paragraph).hasClass("ui-state-active")) {
             $(paragraph).trigger('click');
           }
