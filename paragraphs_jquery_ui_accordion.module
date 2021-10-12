@@ -112,8 +112,8 @@ function paragraphs_jquery_ui_accordion_field_formatter_view($entity_type, $enti
       array(
         'data' => array('paragraphs_jquery_ui_accordion' => array(
             'ids' => array($entity_id => $accordion_id),
-            'autoscroll' => $settings['autoscroll'],
-            'startclosed' => $settings['startclosed'],
+            'autoscroll' => isset($settings['autoscroll']),
+            'startclosed' => isset($settings['startclosed']),
           )),
         'type' => 'setting',
       ),
