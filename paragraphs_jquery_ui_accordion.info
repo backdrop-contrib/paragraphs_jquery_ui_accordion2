@@ -1,7 +1,0 @@
-name = Paragraphs jQuery UI Accordion
-description = Adds jQuery UI Accordion for paragraphs.
-backdrop = 1.x
-type = module
-package = Paragraphs
-
-dependencies[] = paragraphs

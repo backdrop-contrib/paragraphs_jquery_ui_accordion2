@@ -4,12 +4,12 @@
  */
 
 (function ($) {
-  Backdrop.behaviors.paragraphs_jquery_ui_accordion = {
+  Backdrop.behaviors.paragraphs_jquery_ui_accordion2 = {
     attach: function (context, settings) {
     $('.para-jq-acc', context).each(function (id) {
         var accordion_id = $(this).attr('id');
-        var autoscroll = Backdrop.settings.paragraphs_jquery_ui_accordion.autoscroll;
-        var startclosed = Backdrop.settings.paragraphs_jquery_ui_accordion.startclosed;
+        var autoscroll = Backdrop.settings.paragraphs_jquery_ui_accordion2.autoscroll;
+        var startclosed = Backdrop.settings.paragraphs_jquery_ui_accordion2.startclosed;
         if (window.location.hash) {
           var activeParagraph = false;
         } else {

@@ -1,0 +1,7 @@
+name = Paragraphs jQuery UI Accordion 2
+description = Adds jQuery UI Accordion for paragraphs. Enhanced functionality using display modes rather than single content field.
+backdrop = 1.x
+type = module
+package = Paragraphs
+
+dependencies[] = paragraphs
