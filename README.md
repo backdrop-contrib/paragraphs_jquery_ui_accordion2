@@ -65,9 +65,10 @@ Bugs and feature requests should be reported in the [Issue Queue](https://github
 
 ## Credits
 - Created for Backdrop by [Martin Price](https://github.com/yorkshire-pudding) - [System Horizons](https://www.systemhorizons.co.uk)
-- Based on a fork of [Paragraphs jQuery UI Accordion](https://github.com/backdrop-contrib/paragraphs_jquery_ui_accordion) which was ported to Backdrop
+- Based on a fork of [Paragraphs jQuery UI Accordion](https://github.com/backdrop-contrib/paragraphs_jquery_ui_accordion):
+  - Ported to Backdrop
 and maintained by [Alan Mels](https://github.com/alanmels) of [AltaGrade](https://www.altagrade.com)
-- Created for Drupal by [Maksym Shakhrai](https://github.com/maxdev)
+  - Created for Drupal by [Maksym Shakhrai](https://github.com/maxdev)
 
 ## License
 This project is GPL v2 software. See the LICENSE.txt file in this directory for
