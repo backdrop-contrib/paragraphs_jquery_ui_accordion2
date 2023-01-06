@@ -38,11 +38,11 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_summary($field
   if (plus_icon_check()) {
     $summary = t('Use field <strong>@title</strong> for title, <strong>@icon</strong> for icon and display format <strong>@view_mode</strong> for content in paragraphs, autoscroll <strong>@autoscroll</strong> and startclosed <strong>@startclosed</strong>',
       array(
-      '@title' => $settings['title'],
-      '@icon' => $settings['icon_field'],
-      '@view_mode' => $settings['view_mode'],
-      '@autoscroll' => $settings['autoscroll'] ? t('enabled') : t('disabled'),
-      '@startclosed' => $settings['startclosed'] ? t('enabled') : t('disabled'),
+        '@title' => $settings['title'],
+        '@icon' => $settings['icon_field'],
+        '@view_mode' => $settings['view_mode'],
+        '@autoscroll' => $settings['autoscroll'] ? t('enabled') : t('disabled'),
+        '@startclosed' => $settings['startclosed'] ? t('enabled') : t('disabled'),
       )
     );
   }
@@ -165,10 +165,10 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
       ),
       array(
         'data' => array('paragraphs_jquery_ui_accordion2' => array(
-            'ids' => array($entity_id => $accordion_id),
-            'autoscroll' => isset($settings['autoscroll']),
-            'startclosed' => isset($settings['startclosed']),
-          )),
+          'ids' => array($entity_id => $accordion_id),
+          'autoscroll' => isset($settings['autoscroll']),
+          'startclosed' => isset($settings['startclosed']),
+        )),
         'type' => 'setting',
       ),
     ),
@@ -188,26 +188,28 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
       $paragraph->setHostEntity($entity_type, $entity, $langcode);
       if (entity_access('view', 'paragraphs_item', $paragraph)) {
         // Get the title field from the paragraph.
-        $paragraph_title = field_get_items('paragraphs_item',$paragraph,$settings['title']);
-        // Check if icon font module exists and return setting if it does
+        $paragraph_title = field_get_items('paragraphs_item', $paragraph, $settings['title']);
+        // Check if icon font module exists and return setting if it does then
+        // prepare the icon, if present.
         if (plus_icon_check()) {
           // Get the icon field from the paragraph.
-          $paragraph_icon = field_get_items('paragraphs_item',$paragraph,$settings['icon_field']);
+          $paragraph_icon = field_get_items('paragraphs_item', $paragraph, $settings['icon_field']);
           ($paragraph_icon) ? $paragraph_icon_string = '<i class="' . $paragraph_icon[0]['value'] . '">&zwnj;</i> ' : '';
         }
         // Get the paragraph using the defined display mode.
         $paragraph_content = $paragraph->view($view_mode, $langcode);
         // Use the title to generate a unique id for each accordion item.
         $paragraphs_unique_id = backdrop_html_id(strtolower($paragraph_title[0]['value']));
-        // Insert the title, unique_id and content into the accordion item structure.
+        // Insert the title, unique_id and content into the accordion item
+        // structure.
         $element[0]['accordion'][] = array(
           'title' => array('#markup' => '<h3><a id="'
-            . $paragraphs_unique_id 
-            . '" href="#' 
-            . $paragraphs_unique_id 
+            . $paragraphs_unique_id
+            . '" href="#'
+            . $paragraphs_unique_id
             . '">'
             . $paragraph_icon_string
-            . $paragraph_title[0]['value'] 
+            . $paragraph_title[0]['value']
             . '</a></h3>'),
           'content' => $paragraph_content,
         );
