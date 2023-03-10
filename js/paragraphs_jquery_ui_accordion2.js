@@ -29,7 +29,7 @@
           heightStyle: "content"
         });
 
-        $(accordion_id, context).on("accordionactivate", function (event, ui) {
+        $('#' + accordion_id, context).on("accordionactivate", function (event, ui) {
           var newHash = $(ui.newHeader).find('a').attr('href');
           changeHash(newHash, autoscroll);
         });
