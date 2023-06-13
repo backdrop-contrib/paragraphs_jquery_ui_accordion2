@@ -189,6 +189,9 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
       if (entity_access('view', 'paragraphs_item', $paragraph)) {
         // Get the title field from the paragraph.
         $paragraph_title = field_get_items('paragraphs_item', $paragraph, $settings['title']);
+        // Declare the paragraph icon string as blank in case Font Awesome not
+        // installed.
+        $paragraph_icon_string = '';
         // Check if icon font module exists and return setting if it does then
         // prepare the icon, if present.
         if (plus_icon_check()) {
