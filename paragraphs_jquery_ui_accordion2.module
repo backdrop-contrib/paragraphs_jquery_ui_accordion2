@@ -15,6 +15,10 @@ function paragraphs_jquery_ui_accordion2_field_formatter_info() {
       'field types' => array('paragraphs'),
       'settings' => array(
         'title' => NULL,
+        'title_column_wrapper' => array(
+          'title_column_default' => NULL,
+          'title_column' => NULL,
+        ),
         'view_mode' => 'default',
         'autoscroll' => NULL,
         'startclosed' => NULL,
@@ -22,7 +26,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_info() {
     ),
   );
   // If an icon font module is present, include the icon field setting.
-  if (plus_icon_check()) {
+  if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
     $formatter_definition['paragraphs_jquery_ui_accordion2']['settings']['icon_field'] = NULL;
   }
   // Return the final array.
@@ -35,7 +39,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_info() {
 function paragraphs_jquery_ui_accordion2_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  if (plus_icon_check()) {
+  if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
     $summary = t('Use field <strong>@title</strong> for title, <strong>@icon</strong> for icon and display format <strong>@view_mode</strong> for content in paragraphs, autoscroll <strong>@autoscroll</strong> and startclosed <strong>@startclosed</strong>',
       array(
         '@title' => $settings['title'],
@@ -60,6 +64,38 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_summary($field
 }
 
 /**
+ * Define field types that are unsuitable for the title field.
+ */
+function paragraphs_jquery_ui_accordion2_title_exclude_field_types() {
+  $field_types = array(
+    // Core field types.
+    'text_with_summary',
+    'text_long',
+    'list_boolean',
+    'datetime',
+    'date',
+    'datestamp',
+    'file',
+    'image',
+    'email',
+    'number_integer',
+    'number_decimal',
+    'number_float',
+    'link_field',
+    'entityreference',
+    'taxonomy_term_reference',
+    // Contrib field types.
+    'blockreference',
+    'paragraphs',
+    'youtube',
+    'repeating_date',
+    'serial',
+    'fivestar',
+  );
+  return $field_types;
+}
+
+/**
  * Implements hook_field_formatter_settings_form().
  */
 function paragraphs_jquery_ui_accordion2_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
@@ -71,14 +107,24 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_form($field, $
   $paragraphs_fields = array();
   $paragraphs_fields[NULL] = t('- Select a field -');
 
+  $title_excluded_field_types = paragraphs_jquery_ui_accordion2_title_exclude_field_types();
+  $title_allowable_fields = field_read_fields();
+
+  foreach ($title_allowable_fields as $field_name => $field_data) {
+    if (in_array($field_data['type'], $title_excluded_field_types)) {
+      unset($title_allowable_fields[$field_name]);
+    }
+  }
+
   // Check every paragraph type.
   $bundles = paragraphs_bundle_load();
   foreach ($bundles as $bundle) {
-    // Get list of all paragraph fields to select the title field from.
+    // Get list of all paragraph fields to select the title field and icon from.
     $instances = field_info_instances('paragraphs_item', $bundle->bundle);
     foreach ($instances as $paragraphs_instance) {
       $paragraphs_fields[$paragraphs_instance['field_name']] = $paragraphs_instance['label'];
     }
+
     // Get list of all paragraph display modes.
     $entity_type = entity_get_info('paragraphs_item');
     foreach ($entity_type['view modes'] as $mode => $info) {
@@ -86,13 +132,66 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_form($field, $
     }
   }
 
+  $element['field_machine_name'] = array(
+    '#type' => 'value',
+    '#value' => $field['field_name'],
+  );
+
+  $paragraphs_title_options = array_intersect_key($paragraphs_fields, $title_allowable_fields);
   $element['title'] = array(
     '#type' => 'select',
     '#title' => t('Paragraph title'),
     '#default_value' => $settings['title'],
-    '#options' => $paragraphs_fields,
+    '#options' => $paragraphs_title_options,
+    '#ajax' => array(
+      'event' => 'change',
+      'callback' => 'paragraphs_jquery_ui_accordion2_title_column_callback',
+      'wrapper' => 'title-column-wrapper',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
   );
-  if (plus_icon_check()) {
+
+  // Define the options for the field columns if the title field does not use
+  // the default of 'value'.
+  $options = array('value' => 'Default');
+  $title_field_name = $form_state['values']['fields'][$field['field_name']]['settings_edit_form']['settings']['title'] ?? $settings['title'];
+  if ($title_field_name) {
+    $options = paragraphs_jquery_ui_accordion2_get_field_columns($title_field_name);
+  }
+  else {
+    $options = array('value' => 'Default');
+  }
+  // Check if the title column is the default so we can hide the title column
+  // field.
+  $title_column_default = (bool) (count($options) == 1 && array_key_exists('value', $options));
+
+  // Wrap the title column in a wrapper so we can update the options and also
+  // hide the field if the column is the default.
+  $element['title_column_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="title-column-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $element['title_column_wrapper']['title_column_default'] = array(
+    '#type' => 'hidden',
+    '#value' => $title_column_default ? 1 : 0,
+  );
+
+  $element['title_column_wrapper']['title_column'] = array(
+    '#type' => 'select',
+    '#title' => t('Paragraph title column'),
+    '#default_value' => $settings['title_column'] ?? 'value',
+    '#options' => $options,
+    '#states' => array(
+      'visible' => array(
+        ':input[name$="[title_column_wrapper][title_column_default]"]' => array('value' => 0),
+      ),
+    ),
+  );
+
+  if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
     $element['icon_field'] = array(
       '#type' => 'select',
       '#title' => t('Icon (to prefix title)'),
@@ -117,6 +216,40 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_form($field, $
     '#default_value' => isset($settings['startclosed']) ? $settings['startclosed'] : 0,
   );
   return $element;
+}
+
+/**
+ * AJAX Callback for title columns.
+ */
+function paragraphs_jquery_ui_accordion2_title_column_callback($form, $form_state) {
+  // Retrieve the dynamic field name.
+  foreach ($form['fields'] as $field_name => $field_info) {
+    if (isset($field_info['format']['settings_edit_form']['settings']['field_machine_name']) &&
+        $field_info['format']['settings_edit_form']['settings']['field_machine_name']['#value'] === $field_name) {
+      // Return the dependent field or field wrapper inside this fields
+      // formatter settings.
+      return $form['fields'][$field_name]['format']['settings_edit_form']['settings']['title_column_wrapper'];
+    }
+  }
+}
+
+/**
+ * Helper to get columns for any title fields that don't use the value column.
+ */
+function paragraphs_jquery_ui_accordion2_get_field_columns($title_field_name) {
+  $field_info = field_info_field($title_field_name);
+  $field_uses_value = (bool) array_key_exists('value', $field_info['columns']);
+  $options = array();
+  if ($field_uses_value) {
+    $options = array('value' => 'Default');
+  }
+  else {
+    $columns = array_keys($field_info['columns']);
+    foreach ($columns as $column) {
+      $options[$column] = $column;
+    }
+  }
+  return $options;
 }
 
 /**
@@ -182,6 +315,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
   );
 
   // Combine the title and paragraph display mode to generate each accordion.
+  $title_column = $settings['title_column_wrapper']['title_column'];
   foreach ($items as $delta => $item) {
     $paragraphs_ids[$delta] = $item['value'];
     if ($paragraph = paragraphs_field_get_entity($item)) {
@@ -194,7 +328,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
         $paragraph_icon_string = '';
         // Check if icon font module exists and return setting if it does then
         // prepare the icon, if present.
-        if (plus_icon_check()) {
+        if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
           // Get the icon field from the paragraph.
           $paragraph_icon = field_get_items('paragraphs_item', $paragraph, $settings['icon_field']);
           ($paragraph_icon) ? $paragraph_icon_string = '<i class="' . $paragraph_icon[0]['value'] . '">&zwnj;</i> ' : '';
@@ -202,7 +336,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
         // Get the paragraph using the defined display mode.
         $paragraph_content = $paragraph->view($view_mode, $langcode);
         // Use the title to generate a unique id for each accordion item.
-        $paragraphs_unique_id = backdrop_html_id(strtolower($paragraph_title[0]['value']));
+        $paragraphs_unique_id = backdrop_html_id(strtolower($paragraph_title[0][$title_column]));
         // Insert the title, unique_id and content into the accordion item
         // structure.
         $element[0]['accordion'][] = array(
@@ -212,7 +346,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
             . $paragraphs_unique_id
             . '">'
             . $paragraph_icon_string
-            . $paragraph_title[0]['value']
+            . $paragraph_title[0][$title_column]
             . '</a></h3>'),
           'content' => $paragraph_content,
         );
@@ -225,6 +359,6 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
 /**
  * Helper function to check if icon font is enabled.
  */
-function plus_icon_check() {
+function paragraphs_jquery_ui_accordion2_icon_module_check() {
   return module_exists('font_awesome');
 }

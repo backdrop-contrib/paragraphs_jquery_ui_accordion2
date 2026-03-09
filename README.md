@@ -15,6 +15,8 @@ This module is a fork from [Paragraphs jQuery UI Accordion](https://backdropcms.
 content in addition to the title field.
 - If you have Font Awesome enabled then you will also be able to select an icon
 field to display an icon in front of the heading.
+- If your title field is a field type with a different field storage to a short
+text field, you can select the column where the title will be retrieved from.
 
 ## Features
 - Ability to use it with any paragraph types.
@@ -31,19 +33,19 @@ This module requires that the following module is also enabled:
 
 - [Paragraphs](https://github.com/backdrop-contrib/paragraphs)
 
-This module can optionally use [Font Awesome](https://github.com/backdrop-contrib/font_awesome) to show an icon in the
-accordion header before the title.
+This module can optionally use [Font Awesome](https://github.com/backdrop-contrib/font_awesome)
+to show an icon in the accordion header before the title.
 
 ## Installation
 -  Install this module using the official [Backdrop CMS instructions](https://backdropcms.org/user-guide/modules).
 
 ## Usage
-- Ensure each paragraph type has a text field for title and at least one other
-field.
+- Ensure each paragraph type has a suitable field for title and at least one
+other field.
 - If you wish to use icons, add a field to contain the Font Awesome icon
 identifier string. This could be a text field or a list field.
 - If you have Font Awesome enabled but do not wish to use in an accordion,
-either do not set and icon field or leave the icon field blank for any
+either do not set an icon field or leave the icon field blank for any
 paragraphs you wish to not use an icon for.
 - You must use common title and icon fields across different paragraph types.
 - Create a paragraph display mode (for example, called Accordion) that excludes
@@ -53,6 +55,8 @@ the title field and, if applicable, the icon field.
 - Go to your entity's Manage display screen and choose 'Paragraphs jQuery UI
 Accordion 2' for the format.
 - Select the proper fields for title and, if applicable, icon.
+- If your title field has an alternative field storage definition you can
+select the column that will contain the title text.
 - Select the display mode and save your settings.
 - You are now ready to add Accordions to your content.
 
