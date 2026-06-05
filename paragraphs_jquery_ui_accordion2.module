@@ -315,7 +315,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
   );
 
   // Combine the title and paragraph display mode to generate each accordion.
-  $title_column = $settings['title_column_wrapper']['title_column'];
+  $title_column = $settings['title_column_wrapper']['title_column'] ?? 'value';
   foreach ($items as $delta => $item) {
     $paragraphs_ids[$delta] = $item['value'];
     if ($paragraph = paragraphs_field_get_entity($item)) {
