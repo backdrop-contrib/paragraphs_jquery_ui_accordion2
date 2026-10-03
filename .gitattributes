@@ -1,1 +1,3 @@
 *.module linguist-language=PHP
+*.install linguist-language=PHP
+*.inc linguist-language=PHP

@@ -1,0 +1,4 @@
+/* If IconField used for icon, give icon the height of the containing element */
+.ui-accordion-header svg.icon {
+  height: 1em;
+}
