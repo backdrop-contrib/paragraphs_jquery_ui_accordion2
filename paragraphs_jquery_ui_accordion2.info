@@ -3,9 +3,13 @@ description = Adds jQuery UI Accordion for paragraphs. Enhanced functionality us
 backdrop = 1.x
 type = module
 
+dependencies[] = paragraphs
+
 maintainers[yorkshire-pudding] = Martin Price
-maintainers_wanted = TRUE
 
 package = Paragraphs
-
-dependencies[] = paragraphs
+tags[] = Content
+tags[] = Accordion
+tags[] = Structure
+tags[] = User Interface
+tags[] = Icons

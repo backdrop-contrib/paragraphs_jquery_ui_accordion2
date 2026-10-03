@@ -27,7 +27,8 @@ function paragraphs_jquery_ui_accordion2_field_formatter_info() {
   );
   // If an icon font module is present, include the icon field setting.
   if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
-    $formatter_definition['paragraphs_jquery_ui_accordion2']['settings']['icon_field'] = NULL;
+    $formatter_definition['paragraphs_jquery_ui_accordion2']['settings']['icon_field_type'] = 'none';
+    $formatter_definition['paragraphs_jquery_ui_accordion2']['settings']['icon_field_wrapper']['icon_field'] = NULL;
   }
   // Return the final array.
   return $formatter_definition;
@@ -43,7 +44,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_summary($field
     $summary = t('Use field <strong>@title</strong> for title, <strong>@icon</strong> for icon and display format <strong>@view_mode</strong> for content in paragraphs, autoscroll <strong>@autoscroll</strong> and startclosed <strong>@startclosed</strong>',
       array(
         '@title' => $settings['title'],
-        '@icon' => $settings['icon_field'],
+        '@icon' => $settings['icon_field_wrapper']['icon_field'],
         '@view_mode' => $settings['view_mode'],
         '@autoscroll' => $settings['autoscroll'] ? t('enabled') : t('disabled'),
         '@startclosed' => $settings['startclosed'] ? t('enabled') : t('disabled'),
@@ -91,6 +92,7 @@ function paragraphs_jquery_ui_accordion2_title_exclude_field_types() {
     'repeating_date',
     'serial',
     'fivestar',
+    'icon',
   );
   return $field_types;
 }
@@ -191,20 +193,102 @@ function paragraphs_jquery_ui_accordion2_field_formatter_settings_form($field, $
     ),
   );
 
-  if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
-    $element['icon_field'] = array(
+  // Check for any icon modules.
+  $icon_modules = paragraphs_jquery_ui_accordion2_icon_module_check();
+  if ($icon_modules) {
+    // If one or more icon modules is enabled, show the icon type setting.
+    $icon_field_type_options = array(
+      'none' => t('No icon'),
+    );
+    // Font Awesome.
+    if (in_array('font_awesome', $icon_modules)) {
+      $icon_field_type_options['font_awesome'] = t('Font Awesome text definition');
+    }
+    // Icon Field.
+    if (in_array('iconfield', $icon_modules)) {
+      $icon_field_type_options['iconfield'] = t('Icon Field');
+    }
+    $element['icon_field_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Icon Type'),
+      '#default_value' => $settings['icon_field_type'],
+      '#options' => $icon_field_type_options,
+      '#ajax' => array(
+        'event' => 'change',
+        'callback' => 'paragraphs_jquery_ui_accordion2_icon_field_callback',
+        'wrapper' => 'icon-field-wrapper',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+    );
+    // Add additional description for the Font Awesome option.
+    $fa_description = t('This option provides backwards compatibility with all previously defined paragraph fields using this module with Font Awesome icons. Going forward, using the Icon Field module to browse and select icons provides a much better editor experience.');
+    $element['icon_field_type']['font_awesome']['#description'] = $fa_description;
+
+    // If the Icon Field Type settings is populated retreive it from the
+    // $form_state array.
+    $icon_field_type = $form_state['values']['fields'][$field['field_name']]['settings_edit_form']['settings']['icon_field_type'] ?? $settings['icon_field_type'];
+
+    // Populate the list of fields to select from depending on the Icon Field
+    // Type selected.
+    $paragraphs_icon_fields = array();
+    switch ($icon_field_type) {
+      case 'font_awesome':
+        $field_types = array('text', 'list_text');
+        $icon_allowable_fields = array();
+        foreach ($field_types as $field_type) {
+          $icon_allowable_fields = array_merge($icon_allowable_fields, field_read_fields(array('type' => $field_type)));
+        }
+        $paragraphs_icon_fields = array_intersect_key($paragraphs_fields, $icon_allowable_fields);
+        break;
+      case 'iconfield':
+        $icon_allowable_fields = field_read_fields(array('type' => 'icon'));
+        $paragraphs_icon_fields = array_intersect_key($paragraphs_fields, $icon_allowable_fields);
+        break;
+      default:
+        $paragraphs_icon_fields['na'] = t('Not applicable');
+    }
+    if (empty($paragraphs_icon_fields)) {
+      $paragraphs_icon_fields[0] = t('No fields available');
+    }
+    // Wrap the field in a wrapper so it can be updated via AJAX.
+    $element['icon_field_wrapper'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="icon-field-wrapper">',
+      '#suffix' => '</div>',
+      '#states' => array(
+      ),
+    );
+    // Add and populate a hidden value so can hide or show the icon field.
+    $icon_field_show = $icon_field_type != 'none';
+    $element['icon_field_wrapper']['icon_field_show'] = array(
+      '#type' => 'hidden',
+      '#value' => $icon_field_show ? 1 : 0,
+    );
+    $element['icon_field_wrapper']['icon_field'] = array(
       '#type' => 'select',
-      '#title' => t('Icon (to prefix title)'),
-      '#default_value' => $settings['icon_field'],
-      '#options' => $paragraphs_fields,
+      '#title' => t('Icon Field'),
+      '#default_value' => $settings['icon_field_wrapper']['icon_field'] ?? 'na',
+      '#options' => $paragraphs_icon_fields,
+      '#states' => array(
+        'visible' => array(
+          ':input[name$="[icon_field_wrapper][icon_field_show]"]' => array('value' => 1),
+        ),
+        'required' => array(
+          ':input[name$="[icon_field_wrapper][icon_field_show]"]' => array('value' => 1),
+        ),
+      ),
     );
   }
+  // Select the Display View mode to show as the accordion content.
   $element['view_mode'] = array(
     '#type' => 'select',
     '#title' => t('Paragraph content display mode'),
     '#default_value' => $settings['view_mode'],
     '#options' => $display_mode_options,
   );
+
+  // Accordion behaviour settings.
   $element['autoscroll'] = array(
     '#type' => 'checkbox',
     '#title' => t('AutoScroll'),
@@ -229,6 +313,21 @@ function paragraphs_jquery_ui_accordion2_title_column_callback($form, $form_stat
       // Return the dependent field or field wrapper inside this fields
       // formatter settings.
       return $form['fields'][$field_name]['format']['settings_edit_form']['settings']['title_column_wrapper'];
+    }
+  }
+}
+
+/**
+ * AJAX Callback for icon fields.
+ */
+function paragraphs_jquery_ui_accordion2_icon_field_callback($form, $form_state) {
+  // Retrieve the dynamic field name.
+  foreach ($form['fields'] as $field_name => $field_info) {
+    if (isset($field_info['format']['settings_edit_form']['settings']['field_machine_name']) &&
+        $field_info['format']['settings_edit_form']['settings']['field_machine_name']['#value'] === $field_name) {
+      // Return the dependent field or field wrapper inside this fields
+      // formatter settings.
+      return $form['fields'][$field_name]['format']['settings_edit_form']['settings']['icon_field_wrapper'];
     }
   }
 }
@@ -305,6 +404,9 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
         'type' => 'setting',
       ),
     ),
+    'css' => array(
+      backdrop_get_path('module', 'paragraphs_jquery_ui_accordion2') . '/css/paragraphs_jquery_ui_accordion2.css',
+    ),
   );
   $element[0]['accordion'] = array(
     '#type' => 'container',
@@ -322,21 +424,32 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
       $paragraph->setHostEntity($entity_type, $entity, $langcode);
       if (entity_access('view', 'paragraphs_item', $paragraph)) {
         // Get the title field from the paragraph.
-        $paragraph_title = field_get_items('paragraphs_item', $paragraph, $settings['title']);
+        $paragraph_title_field = field_get_items('paragraphs_item', $paragraph, $settings['title']);
+        $paragraph_title = $paragraph_title_field[0][$title_column] ?? '';
         // Declare the paragraph icon string as blank in case Font Awesome not
         // installed.
         $paragraph_icon_string = '';
         // Check if icon font module exists and return setting if it does then
         // prepare the icon, if present.
-        if (paragraphs_jquery_ui_accordion2_icon_module_check()) {
+        // @todo - UPDATE THIS SECTION
+        $icon_field_type = $settings['icon_field_type'];
+        if ($icon_field_type !== 'none') {
           // Get the icon field from the paragraph.
-          $paragraph_icon = field_get_items('paragraphs_item', $paragraph, $settings['icon_field']);
-          ($paragraph_icon) ? $paragraph_icon_string = '<i class="' . $paragraph_icon[0]['value'] . '">&zwnj;</i> ' : '';
+          $paragraph_icon = field_get_items('paragraphs_item', $paragraph, $settings['icon_field_wrapper']['icon_field']);
+
+          // Format the icon according to the type of field.
+          switch ($icon_field_type) {
+            case 'font_awesome':
+              ($paragraph_icon) ? $paragraph_icon_string = '<i class="' . $paragraph_icon[0]['value'] . '">&zwnj;</i> ' : '';
+              break;
+            case 'iconfield':
+              ($paragraph_icon) ? $paragraph_icon_string = icon($paragraph_icon[0]['key']) . ' ' : '';
+          }
         }
         // Get the paragraph using the defined display mode.
         $paragraph_content = $paragraph->view($view_mode, $langcode);
         // Use the title to generate a unique id for each accordion item.
-        $paragraphs_unique_id = backdrop_html_id(strtolower($paragraph_title[0][$title_column]));
+        $paragraphs_unique_id = backdrop_html_id(strtolower($paragraph_title));
         // Insert the title, unique_id and content into the accordion item
         // structure.
         $element[0]['accordion'][] = array(
@@ -346,7 +459,7 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
             . $paragraphs_unique_id
             . '">'
             . $paragraph_icon_string
-            . $paragraph_title[0][$title_column]
+            . $paragraph_title
             . '</a></h3>'),
           'content' => $paragraph_content,
         );
@@ -358,7 +471,20 @@ function paragraphs_jquery_ui_accordion2_field_formatter_view($entity_type, $ent
 
 /**
  * Helper function to check if icon font is enabled.
+ *
+ * @return array|FALSE
+ *   Return an array of module names or FALSE if none.
  */
 function paragraphs_jquery_ui_accordion2_icon_module_check() {
-  return module_exists('font_awesome');
+  $result = array();
+  $icon_modules = array(
+    'font_awesome',
+    'iconfield',
+  );
+  foreach ($icon_modules as $icon_module) {
+    if (module_exists($icon_module)) {
+      $result[] = $icon_module;
+    }
+  }
+  return empty($result) ? FALSE : $result;
 }

@@ -1,0 +1,67 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Paragraphs jQuery UI
+ * Accordion 2 module.
+ */
+
+/**
+ * Adjust existing settings if already using icons.
+ */
+function paragraphs_jquery_ui_accordion2_update_1001() {
+  // Get informations about all fields.
+  $fields_info = field_info_fields();
+
+  // Define an array to collect details of paragraph field instances.
+  $paragraph_instance_definitions = array();
+
+  // Loop through each field and get the paragraph fields and their instances.
+  foreach ($fields_info as $field_name => $field) {
+    // If field is not paragraphs move on to next field.
+    if ($field['type'] !== 'paragraphs') continue;
+
+    // Loop through all instances of the field and get the instance name to
+    // access the config.
+    foreach ($field['bundles'] as $entity_type => $bundles) {
+      foreach ($bundles as $bundle) {
+        $instance_name = $entity_type . '.' . $bundle . '.' . $field_name;
+        $paragraph_instance_definitions[] = $instance_name;
+      }
+    }
+  }
+
+  // Loop through each paragraphs field instance and update the config if
+  // needed.
+  foreach ($paragraph_instance_definitions as $key => $instance_name) {
+    $config = config('field.instance.' . $instance_name);
+    // Get all defined display modes.
+    $display_modes = $config->get('display');
+    foreach ($display_modes as $display_name => $display_mode_config) {
+      // If the display mode does not use this module, move to the next.
+      if ($display_mode_config['type'] !== 'paragraphs_jquery_ui_accordion2') {
+        continue;
+      }
+
+      // Get the current icon field setting.
+      $current_icon_field_setting = $display_mode_config['settings']['icon_field'] ?? NULL;
+
+      // Define the config setting for icon field type.
+      $icon_field_type_setting = 'display.' . $display_name . '.settings.icon_field_type';
+      if (empty($current_icon_field_setting)) {
+        // If the display mode settings does not define an icon field set the
+        // "icon_field_type" setting to "none".
+        $config->set($icon_field_type_setting, 'none');
+      }
+      else {
+        // If the display mode settings defines an icon field set the
+        // "icon_field_type" setting to "font_awesome" and transfer the
+        // "icon_field" setting to the wrapper location.
+        $config->set($icon_field_type_setting, 'font_awesome');
+        $config->set('display.' . $display_name . '.settings.icon_field_wrapper.icon_field', $current_icon_field_setting);
+        $config->clear('display.' . $display_name . '.settings.icon_field');
+      }
+    }
+    $config->save();
+  }
+
+}

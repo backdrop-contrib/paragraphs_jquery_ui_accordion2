@@ -12,11 +12,18 @@ This module is a fork from [Paragraphs jQuery UI Accordion](https://backdropcms.
 
 ## Differences from Paragraphs jQuery UI Accordion
 - Instead of a single content field, you select a display mode to use for
-content in addition to the title field.
-- If you have Font Awesome enabled then you will also be able to select an icon
-field to display an icon in front of the heading.
+content in addition to the title field. This allows you to include multiple
+fields and more complex fields like YouTube field or other media. You can even
+embed another paragraphs field.
+- If you have Font Awesome and/or Icon Field enabled then you will also be able
+to select an icon field to display an icon in front of the heading.
 - If your title field is a field type with a different field storage to a short
 text field, you can select the column where the title will be retrieved from.
+For example, if you are also using a paragraph type in other scenarios then you
+might use the [Heading Style Field](https://backdropcms.org/project/field_heading_style)
+([Github Project Page](https://github.com/backdrop-contrib/field_heading_style))
+module and that will also work with this: just select the `heading_text` field
+as the "Paragraph title column".
 
 ## Features
 - Ability to use it with any paragraph types.
@@ -34,7 +41,12 @@ This module requires that the following module is also enabled:
 - [Paragraphs](https://github.com/backdrop-contrib/paragraphs)
 
 This module can optionally use [Font Awesome](https://github.com/backdrop-contrib/font_awesome)
-to show an icon in the accordion header before the title.
+and/or [Icon Field](https://github.com/backdrop-contrib/iconfield) to show an
+icon in the accordion header before the title.
+
+If you have both modules installed, then you can use Icon Field to select from
+Core icons, Font Awesome icons and any other icons declared by themes and
+modules.
 
 ## Installation
 -  Install this module using the official [Backdrop CMS instructions](https://backdropcms.org/user-guide/modules).
@@ -42,11 +54,12 @@ to show an icon in the accordion header before the title.
 ## Usage
 - Ensure each paragraph type has a suitable field for title and at least one
 other field.
-- If you wish to use icons, add a field to contain the Font Awesome icon
-identifier string. This could be a text field or a list field.
-- If you have Font Awesome enabled but do not wish to use in an accordion,
-either do not set an icon field or leave the icon field blank for any
-paragraphs you wish to not use an icon for.
+- If you wish to use icons, either:
+  - Add a field to contain the Font Awesome icon identifier string. This could
+    be a text field or a list field.
+  - Add an Icon Field.
+- If you have Font Awesome and/or Icon Field enabled but do not wish to use in
+an accordion, set the "Icon field type" to "No icon".
 - You must use common title and icon fields across different paragraph types.
 - Create a paragraph display mode (for example, called Accordion) that excludes
 the title field and, if applicable, the icon field.
@@ -65,7 +78,7 @@ Bugs and feature requests should be reported in the [Issue Queue](https://github
 
 ## Current Maintainers
 - [Martin Price](https://github.com/yorkshire-pudding) - [System Horizons](https://www.systemhorizons.co.uk)
-- Collaboration and co-maintainers welcome!
+- Collaboration welcome!
 
 ## Credits
 - Created for Backdrop by [Martin Price](https://github.com/yorkshire-pudding) - [System Horizons](https://www.systemhorizons.co.uk)
